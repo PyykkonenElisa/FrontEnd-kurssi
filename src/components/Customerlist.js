@@ -17,6 +17,14 @@ import Search from '@material-ui/icons/Search';
 import ViewColumn from '@material-ui/icons/ViewColumn';
 import { CircularProgress } from '@material-ui/core';
 
+import Addcustomer from'./Addcustomer';
+import Deletecustomer from './Deletecustomer';
+import Editcustomer from'./Editcustomer';
+import Deletetraining from './Deletetraining';
+import Addtraining from './Addtraining';
+
+
+
 const icons = {
     Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
     Check: forwardRef((props, ref) => <Check {...props} ref={ref} />),
@@ -37,69 +45,91 @@ const icons = {
     ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />)
   };
 
-const columns = [
-    {
-        title: 'Firstname',
-        field: 'firstname'
-    },
-    {
-        title: 'Lastname',
-        field: 'lastname'
-    },
-    {
-        title: 'address',
-        field: 'streetaddress'
-    },
-    {
-        title: 'postcode',
-        field: 'postcode'
-    },
-    {
-        title: 'city',
-        field: 'city'
-    },
-    {
-        title: 'email',
-        field: 'email'
-    },
-    {
-        title: 'phone',
-        field: 'phone'
-    },
-    {
-        title: 'trainings',
-        field: 'trainings',
-        sorting: false,
-        cellStyle: {
-            width: '20%'
-        },
-        render: customer => (customer.trainings || []).map((training, index) => {
-            if (!training.hasOwnProperty('date')) {
-                return
-            }
-            return (
-                <p key={index}>
-                    Date: {new Date(training.date).toLocaleString('en-GB', {
-                        dateStyle: 'medium',
-                        timeStyle: 'short'
-                    })} <br />
-                    Duration: {training.duration} <br />
-                    Activity: {training.activity}
-                </p>
-            )
-        })
-    }
-];
-
 const Customerlist = () => {
     const [customers, setCustomers] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    const columns = [
+        {
+            title: 'firstname',
+            field: 'firstname'
+        },
+        {
+            title: 'lastname',
+            field: 'lastname'
+        },
+        {
+            title: 'address',
+            field: 'streetaddress'
+        },
+        {
+            title: 'postcode',
+            field: 'postcode'
+        },
+        {
+            title: 'city',
+            field: 'city'
+        },
+        {
+            title: 'email',
+            field: 'email'
+        },
+        {
+            title: 'phone',
+            field: 'phone',
+            cellStyle: {
+                width: '15%'
+            }
+        },
+        {
+            title: 'trainings',
+            field: 'trainings',
+            sorting: false,
+            cellStyle: {
+                width: '20%'
+            },
+            render: customer => (customer.trainings || []).map((training, index) => {
+                if (!training.hasOwnProperty('date')) {
+                    return null
+                }
+                return (
+                    <p key={index}>
+                        Date: {new Date(training.date).toLocaleString('en-GB', {
+                            dateStyle: 'medium',
+                            timeStyle: 'short'
+                        })} <br />
+                        Duration: {training.duration} <br />
+                        Activity: {training.activity} <br />
+                        <Deletetraining fetchCustomers={fetchCustomers} training={training}/>
+            
+                    </p>
+                )
+            }
+            )
+        },
+        {   
+            title: 'Add training',
+            sorting: false,
+            render: customer => <Addtraining fetchCustomers={fetchCustomers} customer={customer}/>
+        },
+        {
+            title: 'Edit',
+            sorting: false,
+            render: customer => <Editcustomer fetchCustomers={fetchCustomers} customer={customer}/> 
+        },
+        {
+            title:'Remove',
+            sorting: false,
+            render: customer => <Deletecustomer fetchCustomers={fetchCustomers} customer={customer} />
+        }
+    ];
 
     useEffect(() => {
         fetchCustomers();
     }, [])
 
     const fetchCustomers = () => {
+        setLoading(true)
         fetch('https://customerrest.herokuapp.com/api/customers')
         .then(response => response.json())
         .then(responseData => {
@@ -133,6 +163,10 @@ const Customerlist = () => {
                     icons={icons}
                     title="Customers and trainings"
                 />
+                 
+                <div>
+                    <Addcustomer fetchCustomers={fetchCustomers} />
+                </div>
             </div>
         )
     }
